@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA: todas las rutas resuelven al index (React Router se encarga del resto).
+# El subdominio admin.opticaamen.com se agrega en Netlify como domain alias
+# apuntando al mismo sitio: la app detecta el hostname y muestra el panel.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

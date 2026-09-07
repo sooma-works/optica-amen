@@ -1,5 +1,8 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { CreditCard, Pencil, Plus, Tag, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import Modal from '../../components/Modal'
+import { btnGhost, btnPrimary, iconBtn, inputClass, labelClass } from '../../components/ui'
 import { deletePromocion, listPromociones, savePromocion } from '../../lib/backend'
 
 const vacio = { id: '', titulo: '', descripcion: '', tarjeta: '', activo: true, orden: 0 }
@@ -36,15 +39,19 @@ export default function PromocionesAdmin() {
     cargar()
   }
 
-  if (loading) return <p className="text-ink/50">Cargando...</p>
+  if (loading) {
+    return <div className="h-48 animate-pulse rounded-3xl border border-line bg-white" />
+  }
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-display text-xl text-ink">Promociones ({promociones.length})</h2>
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="font-display text-2xl text-ink">
+          Promociones <span className="text-ink-soft/50">({promociones.length})</span>
+        </h2>
         <button
           onClick={() => setForm({ ...vacio, orden: promociones.length })}
-          className="flex items-center gap-1.5 rounded-md bg-ink px-3 py-2 text-sm font-medium text-white hover:bg-ink-2"
+          className={btnPrimary}
         >
           <Plus size={16} /> Nueva promoción
         </button>
@@ -52,93 +59,111 @@ export default function PromocionesAdmin() {
 
       <div className="flex flex-col gap-3">
         {promociones.map((p) => (
-          <div
+          <motion.div
             key={p.id}
-            className="flex items-center justify-between gap-4 rounded-lg border border-line bg-white p-4"
+            layout
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-wine-200 hover:shadow-[var(--shadow-soft)]"
           >
-            <div>
-              <p className="font-medium text-ink">{p.titulo}</p>
-              <p className="text-sm text-ink/60">{p.descripcion}</p>
-              {p.tarjeta && <p className="text-xs text-gold">{p.tarjeta}</p>}
+            <div className="flex items-start gap-3.5">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                  p.activo ? 'bg-wine-600 text-white' : 'bg-line/60 text-ink-soft'
+                }`}
+              >
+                {p.tarjeta ? <CreditCard size={18} /> : <Tag size={18} />}
+              </span>
+              <div>
+                <p className="font-semibold text-ink">{p.titulo}</p>
+                <p className="text-sm text-ink-soft">{p.descripcion}</p>
+                {p.tarjeta && (
+                  <p className="mt-1 text-xs font-medium text-wine-600">{p.tarjeta}</p>
+                )}
+              </div>
             </div>
-            <div className="flex shrink-0 items-center gap-3">
+
+            <div className="flex shrink-0 items-center gap-1">
               <button
                 onClick={() => toggleActivo(p)}
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                  p.activo ? 'bg-green-100 text-green-700' : 'bg-ink/10 text-ink/50'
+                className={`focus-ring mr-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
+                  p.activo
+                    ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                    : 'bg-line/60 text-ink-soft hover:bg-line'
                 }`}
               >
                 {p.activo ? 'Activa' : 'Oculta'}
               </button>
-              <button onClick={() => setForm(p)} className="text-ink/50 hover:text-ink">
-                <Pencil size={16} />
+              <button onClick={() => setForm(p)} aria-label="Editar" className={iconBtn}>
+                <Pencil size={15} />
               </button>
-              <button onClick={() => eliminar(p.id)} className="text-ink/50 hover:text-red-600">
-                <Trash2 size={16} />
+              <button
+                onClick={() => eliminar(p.id)}
+                aria-label="Eliminar"
+                className={`${iconBtn} hover:bg-red-50 hover:text-red-600`}
+              >
+                <Trash2 size={15} />
               </button>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      {form && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <form onSubmit={handleSubmit} className="w-full max-w-md rounded-lg bg-white p-6">
-            <h3 className="font-display text-lg text-ink">
-              {form.id ? 'Editar promoción' : 'Nueva promoción'}
-            </h3>
-            <label className="mt-4 flex flex-col gap-1 text-sm">
+      <Modal
+        open={Boolean(form)}
+        onClose={() => setForm(null)}
+        title={form?.id ? 'Editar promoción' : 'Nueva promoción'}
+      >
+        {form && (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+            <label className={labelClass}>
               Título
               <input
                 required
                 value={form.titulo}
                 onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                className="rounded-md border border-line px-3 py-2"
+                placeholder="Ej: 6 cuotas sin interés"
+                className={inputClass}
               />
             </label>
-            <label className="mt-3 flex flex-col gap-1 text-sm">
+            <label className={labelClass}>
               Descripción
               <textarea
                 rows={2}
                 value={form.descripcion}
                 onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                className="rounded-md border border-line px-3 py-2"
+                className={`${inputClass} resize-none`}
               />
             </label>
-            <label className="mt-3 flex flex-col gap-1 text-sm">
-              Tarjeta / banco (opcional)
+            <label className={labelClass}>
+              Tarjeta / banco
               <input
                 value={form.tarjeta || ''}
                 onChange={(e) => setForm({ ...form, tarjeta: e.target.value })}
-                className="rounded-md border border-line px-3 py-2"
+                placeholder="Opcional"
+                className={inputClass}
               />
             </label>
-            <label className="mt-3 flex items-center gap-2 text-sm">
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-xl bg-cream/60 px-3.5 py-2.5 text-sm transition-colors hover:bg-wine-50">
               <input
                 type="checkbox"
                 checked={form.activo}
                 onChange={(e) => setForm({ ...form, activo: e.target.checked })}
+                className="accent-wine-600"
               />
               Activa (visible en el sitio)
             </label>
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setForm(null)}
-                className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink/70"
-              >
+            <div className="mt-3 flex justify-end gap-2">
+              <button type="button" onClick={() => setForm(null)} className={btnGhost}>
                 Cancelar
               </button>
-              <button
-                type="submit"
-                className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink-2"
-              >
+              <button type="submit" className={btnPrimary}>
                 Guardar
               </button>
             </div>
           </form>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   )
 }

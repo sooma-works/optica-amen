@@ -1,8 +1,28 @@
+import { motion } from 'framer-motion'
+import { ArrowRight, Eye, Glasses, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import CardSkeleton from '../components/CardSkeleton'
+import Logo from '../components/Logo'
 import ProductCard from '../components/ProductCard'
 import PromoBanner from '../components/PromoBanner'
 import { listProductos, listPromociones } from '../lib/backend'
+
+const beneficios = [
+  { icon: Eye, titulo: 'Examen visual', texto: 'Control de vista sin cargo al armar tus lentes.' },
+  { icon: Glasses, titulo: 'Armado propio', texto: 'Taller en el local, entrega en 48 h.' },
+  { icon: ShieldCheck, titulo: 'Garantía', texto: '6 meses de garantía en armazones y cristales.' },
+]
+
+const contenedor = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+}
 
 export default function Home() {
   const [destacados, setDestacados] = useState([])
@@ -21,42 +41,110 @@ export default function Home() {
     <>
       <PromoBanner promociones={promociones} />
 
-      <section className="mx-auto max-w-6xl px-5 py-16 text-left">
-        <p className="text-sm font-semibold uppercase tracking-widest text-gold">
-          Óptica A.M.E.N.
-        </p>
-        <h1 className="font-display mt-2 max-w-2xl text-4xl leading-tight text-ink sm:text-5xl">
-          Anteojos de sol, recetados y lentes de contacto para cada estilo de vida.
-        </h1>
-        <p className="mt-4 max-w-xl text-base text-ink/60">
-          Conocé nuestro catálogo, mirá precios y promociones vigentes con tarjeta.
-          Visitanos en el local para probarte los modelos y armar tus lentes recetados.
-        </p>
-        <Link
-          to="/catalogo"
-          className="mt-6 inline-block rounded-md bg-ink px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ink-2"
+      <section className="mx-auto max-w-6xl px-5 pt-8">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="relative overflow-hidden rounded-[2rem] bg-wine-800 px-7 py-14 text-left sm:px-14 sm:py-20"
         >
-          Ver catálogo completo
-        </Link>
+          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-wine-500/35 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-wine-400/20 blur-3xl" />
+          <Logo
+            size={340}
+            variant="outline"
+            className="pointer-events-none absolute -right-10 top-1/2 hidden -translate-y-1/2 text-white/8 lg:block"
+          />
+
+          <div className="relative max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-wine-100 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-wine-300" />
+              Catálogo actualizado
+            </span>
+
+            <h1 className="font-display mt-5 text-4xl leading-[1.08] font-semibold text-white sm:text-6xl">
+              Mirá el mundo
+              <br />
+              <span className="text-wine-300">con otros ojos.</span>
+            </h1>
+
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-wine-100/85">
+              Anteojos de sol, recetados y lentes de contacto de las mejores marcas.
+              Consultá precios, promociones y cuotas sin interés — y pasá por el local
+              para probarte los modelos.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                to="/catalogo"
+                className="focus-ring group flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-wine-800 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-8px_rgba(0,0,0,0.4)]"
+              >
+                Ver catálogo
+                <ArrowRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </Link>
+              <Link
+                to="/promociones"
+                className="focus-ring rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10"
+              >
+                Ver promociones
+              </Link>
+            </div>
+          </div>
+        </motion.div>
       </section>
 
+      <motion.section
+        variants={contenedor}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: '-80px' }}
+        className="mx-auto grid max-w-6xl gap-4 px-5 py-12 text-left sm:grid-cols-3"
+      >
+        {beneficios.map((b) => (
+          <motion.div
+            key={b.titulo}
+            variants={item}
+            className="group flex items-start gap-3.5 rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-wine-200 hover:shadow-[var(--shadow-soft)]"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-wine-50 text-wine-600 transition-colors duration-300 group-hover:bg-wine-600 group-hover:text-white">
+              <b.icon size={20} />
+            </span>
+            <div>
+              <p className="font-semibold text-ink">{b.titulo}</p>
+              <p className="mt-0.5 text-sm leading-relaxed text-ink-soft">{b.texto}</p>
+            </div>
+          </motion.div>
+        ))}
+      </motion.section>
+
       <section className="mx-auto max-w-6xl px-5 pb-20 text-left">
-        <div className="mb-6 flex items-baseline justify-between">
-          <h2 className="font-display text-2xl text-ink">Destacados</h2>
-          <Link to="/catalogo" className="text-sm font-medium text-gold hover:underline">
+        <div className="mb-7 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-wine-500">
+              Selección
+            </p>
+            <h2 className="font-display mt-1 text-3xl text-ink">Destacados</h2>
+          </div>
+          <Link
+            to="/catalogo"
+            className="focus-ring group flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-wine-600 transition-colors hover:bg-wine-50"
+          >
             Ver todos
+            <ArrowRight
+              size={15}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
           </Link>
         </div>
 
-        {loading ? (
-          <p className="text-ink/50">Cargando productos...</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {destacados.map((p) => (
-              <ProductCard key={p.id} producto={p} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
+            : destacados.map((p) => <ProductCard key={p.id} producto={p} />)}
+        </div>
       </section>
     </>
   )

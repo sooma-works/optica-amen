@@ -1,22 +1,42 @@
-import { CreditCard } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export default function PromoBanner({ promociones }) {
   const activas = promociones.filter((p) => p.activo)
+  const [i, setI] = useState(0)
+
+  useEffect(() => {
+    if (activas.length < 2) return
+    const id = setInterval(() => setI((prev) => (prev + 1) % activas.length), 4500)
+    return () => clearInterval(id)
+  }, [activas.length])
+
   if (activas.length === 0) return null
 
+  const promo = activas[i % activas.length]
+
   return (
-    <section className="bg-ink text-cream">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-center sm:gap-8">
-        {activas.map((p) => (
-          <div key={p.id} className="flex items-center gap-2 text-sm">
-            <CreditCard size={16} className="shrink-0 text-gold" />
-            <span>
-              <strong className="font-semibold">{p.titulo}</strong>
-              {p.descripcion ? ` — ${p.descripcion}` : ''}
-            </span>
-          </div>
-        ))}
+    <div className="relative overflow-hidden bg-wine-800 text-wine-50">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_140%_at_50%_0%,rgba(255,255,255,0.14),transparent)]" />
+      <div className="relative mx-auto flex h-11 max-w-6xl items-center justify-center gap-2 px-5 text-sm">
+        <Sparkles size={14} className="shrink-0 text-wine-300" />
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={promo.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="truncate text-center"
+          >
+            <strong className="font-semibold">{promo.titulo}</strong>
+            {promo.descripcion ? (
+              <span className="text-wine-200"> — {promo.descripcion}</span>
+            ) : null}
+          </motion.p>
+        </AnimatePresence>
       </div>
-    </section>
+    </div>
   )
 }

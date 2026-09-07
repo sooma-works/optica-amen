@@ -20,6 +20,37 @@ Login del panel interno en modo demo: `/admin/login`
 
 (configurable en `.env`, ver `.env.example`)
 
+## Panel en subdominio (admin.opticaamen.com)
+
+La misma app se sirve en los dos hosts y decide qué mostrar según el hostname
+(`src/lib/routes.js`):
+
+| URL                          | Qué muestra              |
+| ---------------------------- | ------------------------ |
+| `opticaamen.com/`            | Catálogo público         |
+| `opticaamen.com/admin`       | Panel (fallback)         |
+| `admin.opticaamen.com/`      | Panel                    |
+| `admin.opticaamen.com/login` | Login del panel          |
+
+Probarlo en local:
+
+```bash
+npm run dev
+# público: http://localhost:5173
+# panel:   http://admin.localhost:5173
+```
+
+`*.localhost` resuelve solo a 127.0.0.1 en los navegadores modernos, no hace falta
+tocar `/etc/hosts`. Vite lo acepta por `server.allowedHosts` en `vite.config.js`.
+
+> En modo demo los datos viven en `localStorage`, que es **por origen**: lo que
+> cargues en `admin.localhost` no se ve en `localhost`. Para mostrar el flujo
+> completo (edito en el panel → aparece en el catálogo) usá `localhost/admin`.
+> Con Supabase conectado los dos hosts comparten la misma base y esto desaparece.
+
+Al desplegar (Netlify): agregar `admin.opticaamen.com` como *domain alias* del mismo
+sitio. El `netlify.toml` ya incluye el fallback SPA que necesita React Router.
+
 ## Conectar Supabase real
 
 1. Crear un proyecto en [supabase.com](https://supabase.com).

@@ -1,15 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #14213d;
-  --color-ink-2: #1f2f52;
-  --color-gold: #b8860b;
-  --color-gold-light: #d4a017;
-  --color-cream: #faf8f4;
-  --color-line: #e7e2d8;
+  /* Paleta basada en el logo: bordó profundo + crema cálido */
+  --color-wine-50: #fdf5f5;
+  --color-wine-100: #f9e6e6;
+  --color-wine-200: #f1c8c8;
+  --color-wine-300: #e39d9d;
+  --color-wine-400: #cd6363;
+  --color-wine-500: #ac3234;
+  --color-wine-600: #8b1a1c;
+  --color-wine-700: #6e1315;
+  --color-wine-800: #4d0e10;
+  --color-wine-900: #33090a;
 
-  --font-sans: 'Segoe UI', system-ui, Roboto, sans-serif;
-  --font-display: 'Georgia', 'Times New Roman', serif;
+  --color-ink: #1a1214;
+  --color-ink-soft: #57484b;
+  --color-cream: #fbf7f5;
+  --color-line: #eee2e0;
+
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+
+  --shadow-soft: 0 2px 8px -2px rgba(26, 18, 20, 0.06), 0 8px 24px -8px rgba(26, 18, 20, 0.08);
+  --shadow-lift: 0 8px 20px -6px rgba(139, 26, 28, 0.16), 0 20px 40px -16px rgba(26, 18, 20, 0.16);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
@@ -26,4 +41,29 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@utility surface {
+  background: white;
+  border: 1px solid var(--color-line);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-soft);
+}
+
+@utility focus-ring {
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-wine-500);
+    outline-offset: 2px;
+  }
 }

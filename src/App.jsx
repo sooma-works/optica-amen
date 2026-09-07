@@ -1,8 +1,9 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
+import { isAdminHost, LOGIN_PATH, PANEL_PATH } from './lib/routes'
 import AdminLayout from './pages/admin/AdminLayout'
 import CategoriasAdmin from './pages/admin/CategoriasAdmin'
 import Login from './pages/admin/Login'
@@ -21,6 +22,7 @@ function SitioPublico() {
           <Route path="/" element={<Home />} />
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/promociones" element={<Promociones />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <Footer />
@@ -33,9 +35,9 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/admin/login" element={<Login />} />
+          <Route path={LOGIN_PATH} element={<Login />} />
           <Route
-            path="/admin"
+            path={PANEL_PATH}
             element={
               <ProtectedRoute>
                 <AdminLayout />
@@ -46,7 +48,12 @@ export default function App() {
             <Route path="categorias" element={<CategoriasAdmin />} />
             <Route path="promociones" element={<PromocionesAdmin />} />
           </Route>
-          <Route path="/*" element={<SitioPublico />} />
+
+          {isAdminHost ? (
+            <Route path="*" element={<Navigate to={PANEL_PATH} replace />} />
+          ) : (
+            <Route path="/*" element={<SitioPublico />} />
+          )}
         </Routes>
       </AuthProvider>
     </BrowserRouter>
