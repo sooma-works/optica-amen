@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import { Glasses, MessageCircle } from 'lucide-react'
+import { Glasses } from 'lucide-react'
 import { linkWhatsapp } from '../config'
 import { formatPrecio } from '../lib/format'
+import { WhatsappIcon } from './icons'
 
 export default function ProductCard({ producto }) {
   const tieneDescuento = producto.precioAnterior && producto.precioAnterior > producto.precio
@@ -52,7 +53,7 @@ export default function ProductCard({ producto }) {
           rel="noreferrer"
           className="focus-ring absolute inset-x-3 bottom-3 flex translate-y-3 items-center justify-center gap-1.5 rounded-full bg-white/95 py-2.5 text-sm font-semibold text-wine-700 opacity-0 shadow-lg backdrop-blur-sm transition-all duration-400 ease-[var(--ease-out-soft)] group-hover:translate-y-0 group-hover:opacity-100 hover:bg-white"
         >
-          <MessageCircle size={15} />
+          <WhatsappIcon size={15} className="text-[#25D366]" />
           Consultar
         </a>
       </div>

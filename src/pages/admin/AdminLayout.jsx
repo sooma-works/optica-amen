@@ -9,6 +9,7 @@ const tabs = [
   { to: PANEL_PATH, label: 'Productos', end: true },
   { to: adminPath('categorias'), label: 'Categorías' },
   { to: adminPath('promociones'), label: 'Promociones' },
+  { to: adminPath('consultas'), label: 'Consultas' },
 ]
 
 export default function AdminLayout() {

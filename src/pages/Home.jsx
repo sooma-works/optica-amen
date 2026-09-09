@@ -1,17 +1,19 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, Eye, Glasses, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CreditCard, Eye, Glasses, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import CardSkeleton from '../components/CardSkeleton'
 import Logo from '../components/Logo'
 import ProductCard from '../components/ProductCard'
 import PromoBanner from '../components/PromoBanner'
+import Ubicacion from '../components/Ubicacion'
 import { listProductos, listPromociones } from '../lib/backend'
 
 const beneficios = [
   { icon: Eye, titulo: 'Examen visual', texto: 'Control de vista sin cargo al armar tus lentes.' },
   { icon: Glasses, titulo: 'Armado propio', texto: 'Taller en el local, entrega en 48 h.' },
   { icon: ShieldCheck, titulo: 'Garantía', texto: '6 meses de garantía en armazones y cristales.' },
+  { icon: CreditCard, titulo: 'Cuotas sin interés', texto: 'Hasta 6 cuotas con todas las tarjetas.' },
 ]
 
 const contenedor = {
@@ -50,11 +52,17 @@ export default function Home() {
         >
           <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-wine-500/35 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-wine-400/20 blur-3xl" />
-          <Logo
-            size={340}
-            variant="outline"
-            className="pointer-events-none absolute -right-10 top-1/2 hidden -translate-y-1/2 text-white/8 lg:block"
-          />
+          {/* Sello de la marca: entero y centrado en el aire que queda a la
+              derecha del texto, en vez de recortado contra el borde. */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none absolute right-12 top-1/2 hidden -translate-y-1/2 lg:block xl:right-16"
+          >
+            <div className="absolute inset-0 -m-8 rounded-full bg-wine-400/15 blur-2xl" />
+            <Logo size={300} variant="sello" className="relative text-wine-200/45" />
+          </motion.div>
 
           <div className="relative max-w-2xl">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-wine-100 backdrop-blur-sm">
@@ -101,7 +109,7 @@ export default function Home() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: '-80px' }}
-        className="mx-auto grid max-w-6xl gap-4 px-5 py-12 text-left sm:grid-cols-3"
+        className="mx-auto grid max-w-6xl gap-4 px-5 py-12 text-left sm:grid-cols-2 lg:grid-cols-4"
       >
         {beneficios.map((b) => (
           <motion.div
@@ -120,7 +128,7 @@ export default function Home() {
         ))}
       </motion.section>
 
-      <section className="mx-auto max-w-6xl px-5 pb-20 text-left">
+      <section className="mx-auto max-w-6xl px-5 pb-6 text-left">
         <div className="mb-7 flex items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-wine-500">
@@ -146,6 +154,8 @@ export default function Home() {
             : destacados.map((p) => <ProductCard key={p.id} producto={p} />)}
         </div>
       </section>
+
+      <Ubicacion />
     </>
   )
 }

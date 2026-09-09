@@ -67,3 +67,82 @@ body {
     outline-offset: 2px;
   }
 }
+
+/* --- Cinta de promociones -------------------------------------------------
+   El track lleva la lista de promos duplicada y se desplaza exactamente media
+   pista: al terminar, la segunda copia queda donde arrancó la primera, así el
+   bucle empalma sin salto. La duración se pasa por --promo-duracion según
+   cuántas promos haya, para que la velocidad de lectura no dependa del largo.
+*/
+.promo-marquee {
+  overflow: hidden;
+  /* Los bordes se desvanecen para que el texto no corte en seco. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 28px,
+    black calc(100% - 28px),
+    transparent
+  );
+}
+
+.promo-track {
+  display: flex;
+  width: max-content;
+  animation: promoMarquee var(--promo-duracion, 32s) linear infinite;
+}
+
+.promo-marquee:hover .promo-track,
+.promo-marquee:focus-within .promo-track {
+  animation-play-state: paused;
+}
+
+@keyframes promoMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Sin movimiento: se corta la animación y la cinta se puede scrollear a mano,
+   para que las promos sigan siendo legibles enteras. */
+@media (prefers-reduced-motion: reduce) {
+  .promo-track {
+    animation: none;
+  }
+
+  .promo-marquee {
+    overflow-x: auto;
+    mask-image: none;
+  }
+}
+
+/* --- Transición entre páginas --------------------------------------------
+   Va por CSS y no por framer-motion a propósito: con AnimatePresence en
+   mode="wait" la animación de salida no llegaba a dispararse y la ruta nueva
+   se quedaba mostrando la página anterior. Además, si por lo que sea la
+   animación no corre, con CSS el contenido queda visible igual; animando la
+   opacidad por JS el riesgo era una página en blanco.
+*/
+@keyframes paginaEntra {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pagina-entra {
+  animation: paginaEntra 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pagina-entra {
+    animation: none;
+  }
+}

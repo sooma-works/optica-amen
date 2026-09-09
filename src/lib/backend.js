@@ -12,6 +12,7 @@ const LS_KEYS = {
   categorias: 'oamen_categorias',
   productos: 'oamen_productos',
   promociones: 'oamen_promociones',
+  consultas: 'oamen_consultas',
   session: 'oamen_admin_session',
 }
 
@@ -198,6 +199,72 @@ export async function deletePromocion(id) {
   return writeLocal(
     LS_KEYS.promociones,
     actuales.filter((p) => p.id !== id),
+  )
+}
+
+// ---- Consultas (formulario de contacto) -----------------------------------
+// El formulario público solo inserta; leer / marcar / borrar es del panel.
+
+export async function crearConsulta(consulta) {
+  const row = {
+    nombre: consulta.nombre.trim(),
+    email: consulta.email.trim(),
+    telefono: consulta.telefono?.trim() || null,
+    motivo: consulta.motivo,
+    mensaje: consulta.mensaje.trim(),
+  }
+
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('consultas').insert(row)
+    if (error) throw error
+    return
+  }
+
+  const actuales = readLocal(LS_KEYS.consultas, [])
+  actuales.unshift({
+    ...row,
+    id: crypto.randomUUID(),
+    leida: false,
+    creado_at: new Date().toISOString(),
+  })
+  writeLocal(LS_KEYS.consultas, actuales)
+}
+
+export async function listConsultas() {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('consultas')
+      .select('*')
+      .order('creado_at', { ascending: false })
+    if (error) throw error
+    return data
+  }
+  return readLocal(LS_KEYS.consultas, [])
+}
+
+export async function marcarConsultaLeida(id, leida) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('consultas').update({ leida }).eq('id', id)
+    if (error) throw error
+    return listConsultas()
+  }
+  const actuales = readLocal(LS_KEYS.consultas, [])
+  return writeLocal(
+    LS_KEYS.consultas,
+    actuales.map((c) => (c.id === id ? { ...c, leida } : c)),
+  )
+}
+
+export async function deleteConsulta(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('consultas').delete().eq('id', id)
+    if (error) throw error
+    return listConsultas()
+  }
+  const actuales = readLocal(LS_KEYS.consultas, [])
+  return writeLocal(
+    LS_KEYS.consultas,
+    actuales.filter((c) => c.id !== id),
   )
 }
 

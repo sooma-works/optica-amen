@@ -35,10 +35,22 @@ CREATE TABLE IF NOT EXISTS promociones (
   orden INTEGER DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS consultas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre TEXT NOT NULL,
+  email TEXT NOT NULL,
+  telefono TEXT,
+  motivo TEXT DEFAULT '',
+  mensaje TEXT NOT NULL,
+  leida BOOLEAN DEFAULT FALSE,
+  creado_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 2. RLS: lectura pública, escritura solo para usuarios autenticados (admin)
 ALTER TABLE categorias ENABLE ROW LEVEL SECURITY;
 ALTER TABLE productos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE promociones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE consultas ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public read categorias" ON categorias FOR SELECT USING (true);
 CREATE POLICY "Auth write categorias" ON categorias FOR ALL USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
@@ -48,6 +60,12 @@ CREATE POLICY "Auth write productos" ON productos FOR ALL USING (auth.role() = '
 
 CREATE POLICY "Public read promociones" ON promociones FOR SELECT USING (true);
 CREATE POLICY "Auth write promociones" ON promociones FOR ALL USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
+
+-- Consultas del formulario: cualquiera puede enviar, solo el admin las lee.
+CREATE POLICY "Public insert consultas" ON consultas FOR INSERT WITH CHECK (true);
+CREATE POLICY "Auth read consultas" ON consultas FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Auth update consultas" ON consultas FOR UPDATE USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Auth delete consultas" ON consultas FOR DELETE USING (auth.role() = 'authenticated');
 
 -- 3. Storage bucket para imágenes de productos
 INSERT INTO storage.buckets (id, name, public) VALUES ('productos', 'productos', true)

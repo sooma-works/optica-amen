@@ -1,14 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, MessageCircle, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { linkWhatsapp } from '../config'
+import { WhatsappIcon } from './icons'
 import Logo from './Logo'
 
 const links = [
   { to: '/', label: 'Inicio', end: true },
   { to: '/catalogo', label: 'Catálogo' },
   { to: '/promociones', label: 'Promociones' },
+  { to: '/contacto', label: 'Contacto' },
 ]
 
 export default function Navbar() {
@@ -48,23 +50,14 @@ export default function Navbar() {
               to={l.to}
               end={l.end}
               className={({ isActive }) =>
-                `focus-ring relative rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                  isActive ? 'text-wine-700' : 'text-ink-soft hover:text-ink'
+                `focus-ring rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300 ${
+                  isActive
+                    ? 'bg-wine-100 text-wine-700'
+                    : 'text-ink-soft hover:bg-wine-50/70 hover:text-ink'
                 }`
               }
             >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.span
-                      layoutId="nav-pill"
-                      className="absolute inset-0 rounded-full bg-wine-100"
-                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                    />
-                  )}
-                  <span className="relative">{l.label}</span>
-                </>
-              )}
+              {l.label}
             </NavLink>
           ))}
 
@@ -74,7 +67,7 @@ export default function Navbar() {
             rel="noreferrer"
             className="focus-ring ml-2 flex items-center gap-1.5 rounded-full bg-wine-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-wine-700 hover:shadow-[var(--shadow-lift)]"
           >
-            <MessageCircle size={15} />
+            <WhatsappIcon size={16} />
             Consultar
           </a>
         </nav>
@@ -120,7 +113,7 @@ export default function Navbar() {
                 rel="noreferrer"
                 className="mt-1 flex items-center justify-center gap-1.5 rounded-xl bg-wine-600 px-3 py-2.5 text-sm font-semibold text-white"
               >
-                <MessageCircle size={15} />
+                <WhatsappIcon size={16} />
                 Consultar por WhatsApp
               </a>
             </div>
