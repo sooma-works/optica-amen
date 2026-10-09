@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft,
   Check,
@@ -8,8 +8,6 @@ import {
   Link2,
   MapPin,
   Share2,
-  ShieldCheck,
-  Wrench,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -24,18 +22,13 @@ import { getProducto, listCategorias, listProductos } from '../lib/backend'
 import { formatPrecio } from '../lib/format'
 import { imagenesDe, imgAncho } from '../lib/imagenes'
 
-const garantias = [
-  { icon: ShieldCheck, texto: '6 meses de garantía en armazones y cristales' },
-  { icon: Wrench, texto: 'Taller propio: armado y ajustes en el local' },
-  { icon: MapPin, texto: `Retirá en ${NEGOCIO.direccionCorta}` },
-]
-
 export default function Producto() {
   const { id } = useParams()
   const [datos, setDatos] = useState({ estado: 'cargando' })
   const [fotoActiva, setFotoActiva] = useState(0)
   const [galeria, setGaleria] = useState(null)
   const [copiado, setCopiado] = useState(false)
+  const [menuCompartir, setMenuCompartir] = useState(false)
 
   useEffect(() => {
     let vigente = true
@@ -119,9 +112,17 @@ export default function Producto() {
       }
       return
     }
+    // En desktop no hay menú nativo: se ofrecen WhatsApp y copiar el link.
+    setMenuCompartir((abierto) => !abierto)
+  }
+
+  async function copiarLink() {
     await navigator.clipboard.writeText(url)
     setCopiado(true)
-    setTimeout(() => setCopiado(false), 2200)
+    setTimeout(() => {
+      setCopiado(false)
+      setMenuCompartir(false)
+    }, 1600)
   }
 
   return (
@@ -153,6 +154,9 @@ export default function Producto() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className={
+              imagenes.length > 1 ? 'lg:grid lg:grid-cols-[76px_1fr] lg:items-start lg:gap-3' : ''
+            }
           >
             <div className="relative overflow-hidden rounded-[2rem] border border-line bg-white shadow-[var(--shadow-soft)]">
               {imagenes.length > 0 ? (
@@ -184,13 +188,15 @@ export default function Producto() {
             </div>
 
             {imagenes.length > 1 && (
-              <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1">
+              // En desktop las miniaturas van en columna a la izquierda: la
+              // galería queda tan alta como la foto y se equilibra con los datos.
+              <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1 lg:order-first lg:mt-0 lg:flex-col lg:overflow-visible lg:pb-0">
                 {imagenes.map((src, i) => (
                   <button
                     key={src + i}
                     onClick={() => setFotoActiva(i)}
                     aria-label={`Ver foto ${i + 1}`}
-                    className={`focus-ring h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 transition-all duration-200 ${
+                    className={`focus-ring h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl border-2 lg:h-[76px] lg:w-[76px] transition-all duration-200 ${
                       i === fotoActiva
                         ? 'border-wine-500'
                         : 'border-transparent opacity-60 hover:opacity-100'
@@ -201,9 +207,6 @@ export default function Producto() {
                 ))}
               </div>
             )}
-            <p className="mt-2 hidden text-xs text-ink-soft/70 lg:block">
-              Pasá el mouse sobre la foto para ver los detalles de cerca.
-            </p>
           </motion.div>
 
           {/* ---- Datos ---- */}
@@ -211,7 +214,7 @@ export default function Producto() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col"
+            className="flex flex-col lg:justify-center"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-wine-500">
               {producto.marca}
@@ -255,41 +258,83 @@ export default function Producto() {
                 <WhatsappIcon size={18} />
                 Consultar por WhatsApp
               </a>
-              <button
-                onClick={compartir}
-                className="focus-ring flex items-center justify-center gap-2 rounded-full border border-line bg-white px-6 py-3.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:border-wine-300"
-              >
-                {copiado ? (
-                  <>
-                    <Check size={17} className="text-emerald-600" /> Link copiado
-                  </>
-                ) : (
-                  <>
-                    {navigator.share ? <Share2 size={17} /> : <Link2 size={17} />}
-                    {navigator.share ? 'Compartir' : 'Copiar link'}
-                  </>
-                )}
-              </button>
-            </div>
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(`Mirá estos anteojos: ${producto.titulo} ${url}`)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="focus-ring mt-3 w-fit rounded text-sm font-medium text-ink-soft underline-offset-4 transition-colors hover:text-wine-700 hover:underline"
-            >
-              Mandárselo a alguien por WhatsApp →
-            </a>
+              <div className="relative">
+                <button
+                  onClick={compartir}
+                  aria-expanded={menuCompartir}
+                  className="focus-ring flex w-full items-center justify-center gap-2 rounded-full border border-line bg-white px-6 py-3.5 text-sm font-semibold text-ink transition-all duration-300 hover:-translate-y-0.5 hover:border-wine-300"
+                >
+                  <Share2 size={17} /> Compartir
+                </button>
 
-            <ul className="mt-8 flex flex-col gap-3 border-t border-line pt-6">
-              {garantias.map((g) => (
-                <li key={g.texto} className="flex items-center gap-3 text-sm text-ink-soft">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-wine-50 text-wine-600">
-                    <g.icon size={17} />
-                  </span>
-                  {g.texto}
-                </li>
-              ))}
-            </ul>
+                <AnimatePresence>
+                  {menuCompartir && (
+                    <>
+                      {/* Tocar afuera cierra el menú. */}
+                      <button
+                        aria-hidden
+                        tabIndex={-1}
+                        onClick={() => setMenuCompartir(false)}
+                        className="fixed inset-0 z-10 cursor-default"
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                        transition={{ duration: 0.18 }}
+                        className="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-2xl border border-line bg-white p-1.5 shadow-[var(--shadow-lift)]"
+                      >
+                        <a
+                          href={`https://wa.me/?text=${encodeURIComponent(`Mirá estos anteojos: ${producto.titulo} ${url}`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={() => setMenuCompartir(false)}
+                          className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-cream"
+                        >
+                          <WhatsappIcon size={17} className="text-[#25D366]" /> Enviar por WhatsApp
+                        </a>
+                        <button
+                          onClick={copiarLink}
+                          className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium text-ink transition-colors hover:bg-cream"
+                        >
+                          {copiado ? (
+                            <>
+                              <Check size={17} className="text-emerald-600" /> Link copiado
+                            </>
+                          ) : (
+                            <>
+                              <Link2 size={17} className="text-ink-soft" /> Copiar link
+                            </>
+                          )}
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Dato del local, chico y pegado a los botones: es un complemento,
+                no compite con la consulta por WhatsApp. */}
+            <div className="mt-6 flex items-center gap-3 text-sm text-ink-soft">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-wine-50 text-wine-600">
+                <MapPin size={16} />
+              </span>
+              <p className="leading-snug">
+                Probátelos en <span className="font-medium text-ink">{NEGOCIO.direccionCorta}, Rosario</span>
+                <span className="block text-ink-soft/80">
+                  {NEGOCIO.horarios} ·{' '}
+                  <a
+                    href={NEGOCIO.mapsLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="focus-ring rounded font-medium text-wine-600 underline-offset-4 hover:underline"
+                  >
+                    Cómo llegar
+                  </a>
+                </span>
+              </p>
+            </div>
           </motion.div>
         </div>
       </section>

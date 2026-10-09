@@ -6,7 +6,7 @@ export const NEGOCIO = {
   whatsappVisible: '341 425-4107',
   direccion: 'Corrientes 370, Rosario, Santa Fe',
   direccionCorta: 'Corrientes 370',
-  ciudad: 'S2000 CTP · Rosario, Santa Fe',
+  ciudad: 'Rosario, Santa Fe, Argentina',
   horarios: 'Lunes a viernes de 9 a 19 h',
   instagram: 'opticaamen',
   mapsLink: 'https://maps.app.goo.gl/QkRpvhdpH3xvNNor5',
