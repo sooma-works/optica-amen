@@ -40,14 +40,15 @@ export default function CategoriasAdmin() {
   return (
     <div>
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="font-display text-2xl text-ink">
+        <h2 className="font-display text-2xl whitespace-nowrap text-ink">
           Categorías <span className="text-ink-soft/50">({categorias.length})</span>
         </h2>
         <button
           onClick={() => setForm({ id: '', titulo: '', orden: categorias.length })}
-          className={btnPrimary}
+          className={`${btnPrimary} shrink-0 whitespace-nowrap`}
         >
-          <Plus size={16} /> Nueva categoría
+          <Plus size={16} /> <span className="sm:hidden">Nueva</span>
+          <span className="hidden sm:inline">Nueva categoría</span>
         </button>
       </div>
 

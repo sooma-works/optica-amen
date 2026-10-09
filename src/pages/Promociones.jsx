@@ -22,7 +22,7 @@ export default function Promociones() {
   }, [])
 
   return (
-    <section className="mx-auto max-w-6xl px-5 py-12 text-left">
+    <section className="mx-auto max-w-6xl px-5 pt-6 pb-12 text-left sm:pt-10">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -32,9 +32,7 @@ export default function Promociones() {
           Beneficios vigentes
         </p>
         <h1 className="font-display mt-1 text-4xl text-ink">Promociones</h1>
-        <p className="mt-2 text-ink-soft">
-          Financiación y descuentos disponibles en el local.
-        </p>
+        <p className="mt-2 text-ink-soft">Financiación y descuentos disponibles en el local.</p>
       </motion.div>
 
       {loading ? (
@@ -52,30 +50,43 @@ export default function Promociones() {
           animate="show"
           className="mt-8 grid gap-5 sm:grid-cols-2"
         >
-          {promociones.map((p) => (
-            <motion.article
-              key={p.id}
-              variants={item}
-              className="group relative overflow-hidden rounded-3xl border border-line bg-white p-7 transition-all duration-400 ease-[var(--ease-out-soft)] hover:-translate-y-1.5 hover:border-wine-200 hover:shadow-[var(--shadow-lift)]"
-            >
-              <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-wine-50 transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover:scale-150" />
+          {promociones.map((p, i) => {
+            // Si quedan impares, la última ocupa todo el ancho y se acomoda en
+            // horizontal, así la grilla no queda con un hueco.
+            const ancha = promociones.length % 2 === 1 && i === promociones.length - 1
+            return (
+              <motion.article
+                key={p.id}
+                variants={item}
+                className={`group relative overflow-hidden rounded-3xl border border-line bg-white p-7 ${ancha ? 'sm:col-span-2' : ''} transition-all duration-400 ease-[var(--ease-out-soft)] hover:-translate-y-1.5 hover:border-wine-200 hover:shadow-[var(--shadow-lift)]`}
+              >
+                <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-wine-50 transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover:scale-150" />
 
-              <div className="relative">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-wine-600 text-white shadow-sm transition-transform duration-400 group-hover:scale-110 group-hover:-rotate-6">
-                  {p.tarjeta ? <CreditCard size={22} /> : <Tag size={22} />}
-                </span>
+                <div className={`relative ${ancha ? 'sm:flex sm:items-center sm:gap-6' : ''}`}>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-wine-600 text-white shadow-sm transition-transform duration-400 group-hover:scale-110 group-hover:-rotate-6">
+                    {p.tarjeta ? <CreditCard size={22} /> : <Tag size={22} />}
+                  </span>
 
-                <h2 className="font-display mt-4 text-2xl leading-snug text-ink">{p.titulo}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{p.descripcion}</p>
+                  <div className={ancha ? 'sm:flex-1' : ''}>
+                    <h2
+                      className={`font-display mt-4 text-2xl leading-snug text-ink ${ancha ? 'sm:mt-0' : ''}`}
+                    >
+                      {p.titulo}
+                    </h2>
+                    <p className="mt-2 text-sm leading-relaxed text-ink-soft">{p.descripcion}</p>
+                  </div>
 
-                {p.tarjeta && (
-                  <p className="mt-4 inline-block rounded-full bg-wine-50 px-3 py-1 text-xs font-semibold tracking-wide text-wine-700">
-                    {p.tarjeta}
-                  </p>
-                )}
-              </div>
-            </motion.article>
-          ))}
+                  {p.tarjeta && (
+                    <p
+                      className={`mt-4 inline-block shrink-0 rounded-full bg-wine-50 px-3 py-1 text-xs font-semibold tracking-wide text-wine-700 ${ancha ? 'sm:mt-0' : ''}`}
+                    >
+                      {p.tarjeta}
+                    </p>
+                  )}
+                </div>
+              </motion.article>
+            )
+          })}
         </motion.div>
       )}
 

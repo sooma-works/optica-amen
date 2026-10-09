@@ -8,7 +8,6 @@ import { crearConsulta } from '../lib/backend'
 
 const MOTIVOS = [
   'Consulta general',
-  'Turno para examen visual',
   'Presupuesto de anteojos recetados',
   'Lentes de contacto',
   'Reparación o ajuste',
@@ -37,7 +36,7 @@ export default function Contacto() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-5 py-12 text-left">
+    <section className="mx-auto max-w-6xl px-5 pt-6 pb-12 text-left sm:pt-10">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-wine-500">
           Contacto

@@ -1,36 +1,134 @@
-import { motion } from 'framer-motion'
-import { Pencil, Plus, Star, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import Modal from '../../components/Modal'
-import { btnGhost, btnPrimary, iconBtn, inputClass, labelClass } from '../../components/ui'
+import { Reorder, useDragControls } from 'framer-motion'
+import {
+  Eye,
+  EyeOff,
+  GripVertical,
+  Pencil,
+  Percent,
+  Plus,
+  Search,
+  Star,
+  Trash2,
+  X,
+} from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useToast } from '../../components/admin/toastContext'
+import { btnGhost, btnPrimary, iconBtn } from '../../components/ui'
 import {
   deleteProducto,
   listCategorias,
   listProductos,
+  reordenarProductos,
   saveProducto,
 } from '../../lib/backend'
 import { formatPrecio } from '../../lib/format'
+import { imagenesDe, imgAncho } from '../../lib/imagenes'
+import PreciosMasivos from './PreciosMasivos'
+import ProductoForm from './ProductoForm'
 
-const vacio = {
-  id: '',
-  categoriaId: '',
-  titulo: '',
-  marca: '',
-  precio: '',
-  precioAnterior: '',
-  cuotasCantidad: '',
-  cuotasTarjeta: '',
-  descripcion: '',
-  imagen: '',
-  destacado: false,
-  activo: true,
+function FilaProducto({ producto, categoria, puedeOrdenar, onEditar, onToggle, onEliminar, onSoltar }) {
+  const controles = useDragControls()
+  const portada = imagenesDe(producto)[0]
+
+  return (
+    <Reorder.Item
+      value={producto}
+      dragListener={false}
+      dragControls={controles}
+      onDragEnd={onSoltar}
+      className={`relative flex items-center gap-3 rounded-2xl border bg-white p-3 shadow-[var(--shadow-soft)] transition-colors sm:gap-4 sm:p-3.5 ${
+        producto.activo ? 'border-line' : 'border-dashed border-line bg-white/60'
+      }`}
+      whileDrag={{ scale: 1.02, boxShadow: '0 20px 40px -12px rgba(77,14,16,0.3)' }}
+    >
+      {puedeOrdenar && (
+        // El arrastre arranca solo desde la manija: así en el celular se
+        // puede seguir scrolleando la lista tocando cualquier otra parte.
+        <button
+          onPointerDown={(e) => controles.start(e)}
+          aria-label="Arrastrar para cambiar el orden"
+          title="Arrastrar para cambiar el orden"
+          className="-mx-1 shrink-0 cursor-grab touch-none rounded-lg p-1.5 text-ink-soft/40 transition-colors hover:bg-wine-50 hover:text-wine-600 active:cursor-grabbing"
+        >
+          <GripVertical size={18} />
+        </button>
+      )}
+
+      <button onClick={onEditar} className="focus-ring shrink-0 rounded-xl" aria-label={`Editar ${producto.titulo}`}>
+        {portada ? (
+          <img
+            src={imgAncho(portada, 160)}
+            alt=""
+            className={`h-14 w-14 rounded-xl object-cover sm:h-16 sm:w-16 ${producto.activo ? '' : 'opacity-50 grayscale'}`}
+          />
+        ) : (
+          <span className="block h-14 w-14 rounded-xl bg-wine-50 sm:h-16 sm:w-16" />
+        )}
+      </button>
+
+      <button onClick={onEditar} className="focus-ring min-w-0 flex-1 rounded-lg text-left">
+        <p className="line-clamp-2 leading-snug font-semibold text-ink sm:truncate">{producto.titulo}</p>
+        <p className="truncate text-xs text-ink-soft">
+          {producto.marca}
+          {categoria && <span className="hidden text-ink-soft/60 sm:inline"> · {categoria.titulo}</span>}
+        </p>
+        <p className="mt-0.5 text-sm font-semibold text-ink sm:hidden">{formatPrecio(producto.precio)}</p>
+      </button>
+
+      <p className="hidden w-28 shrink-0 text-right font-semibold text-ink sm:block">
+        {formatPrecio(producto.precio)}
+        {producto.precioAnterior > producto.precio && (
+          <span className="block text-xs font-normal text-ink-soft/60 line-through">
+            {formatPrecio(producto.precioAnterior)}
+          </span>
+        )}
+      </p>
+
+      <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+        <button
+          onClick={() => onToggle('destacado')}
+          aria-label={producto.destacado ? 'Quitar de destacados' : 'Destacar en el inicio'}
+          title={producto.destacado ? 'Quitar de destacados' : 'Destacar en el inicio'}
+          className={iconBtn}
+        >
+          <Star size={17} className={producto.destacado ? 'fill-amber-400 text-amber-500' : ''} />
+        </button>
+        <button
+          onClick={() => onToggle('activo')}
+          aria-label={producto.activo ? 'Ocultar del sitio' : 'Mostrar en el sitio'}
+          title={producto.activo ? 'Visible en el sitio (tocá para ocultar)' : 'Oculto (tocá para mostrar)'}
+          className={iconBtn}
+        >
+          {producto.activo ? <Eye size={17} /> : <EyeOff size={17} className="text-ink-soft/50" />}
+        </button>
+        <button onClick={onEditar} aria-label="Editar" className={`${iconBtn} hidden sm:block`}>
+          <Pencil size={16} />
+        </button>
+        <button
+          onClick={onEliminar}
+          aria-label="Eliminar"
+          className={`${iconBtn} hover:bg-red-50 hover:text-red-600`}
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </Reorder.Item>
+  )
 }
 
 export default function ProductosAdmin() {
+  const toast = useToast()
   const [productos, setProductos] = useState([])
   const [categorias, setCategorias] = useState([])
-  const [form, setForm] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [editando, setEditando] = useState(null) // producto, o {} para uno nuevo
+  const [preciosAbierto, setPreciosAbierto] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
+  const [categoriaFiltro, setCategoriaFiltro] = useState('todas')
+  // Mientras se arrastra, la lista que se ve es la que va armando el usuario;
+  // al soltar se guarda y se vuelve a la que sale de los filtros.
+  const [enArrastre, setEnArrastre] = useState(null)
+  const enArrastreRef = useRef(null)
 
   async function cargar() {
     const [p, c] = await Promise.all([listProductos(), listCategorias()])
@@ -43,296 +141,183 @@ export default function ProductosAdmin() {
     cargar()
   }, [])
 
-  function abrirEdicion(p) {
-    setForm({
-      id: p.id,
-      categoriaId: p.categoriaId,
-      titulo: p.titulo,
-      marca: p.marca,
-      precio: p.precio,
-      precioAnterior: p.precioAnterior ?? '',
-      cuotasCantidad: p.cuotas?.cantidad ?? '',
-      cuotasTarjeta: p.cuotas?.tarjeta ?? '',
-      descripcion: p.descripcion,
-      imagen: p.imagen,
-      destacado: p.destacado,
-      activo: p.activo,
-    })
+  const filtrados = useMemo(() => {
+    const texto = busqueda.trim().toLowerCase()
+    return productos.filter(
+      (p) =>
+        (categoriaFiltro === 'todas' || p.categoriaId === categoriaFiltro) &&
+        (!texto || `${p.titulo} ${p.marca}`.toLowerCase().includes(texto)),
+    )
+  }, [productos, busqueda, categoriaFiltro])
+  const visibles = enArrastre ?? filtrados
+
+  function alReordenar(lista) {
+    enArrastreRef.current = lista
+    setEnArrastre(lista)
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    await saveProducto({
-      id: form.id,
-      categoriaId: form.categoriaId,
-      titulo: form.titulo,
-      marca: form.marca,
-      precio: Number(form.precio),
-      precioAnterior: form.precioAnterior ? Number(form.precioAnterior) : null,
-      cuotas: form.cuotasCantidad
-        ? {
-            cantidad: Number(form.cuotasCantidad),
-            tarjeta: form.cuotasTarjeta || 'todas las tarjetas',
-          }
-        : null,
-      descripcion: form.descripcion,
-      imagen: form.imagen,
-      destacado: form.destacado,
-      activo: form.activo,
-      orden: 0,
-    })
-    setForm(null)
-    cargar()
+  // Al soltar se guarda el orden. Si hay una categoría filtrada, sus productos
+  // se reacomodan dentro de los lugares que ya ocupaban en la lista completa.
+  async function guardarOrden() {
+    const nuevos = enArrastreRef.current
+    enArrastreRef.current = null
+    if (!nuevos) return
+    const idsVisibles = new Set(nuevos.map((p) => p.id))
+    let i = 0
+    const completa = productos.map((p) => (idsVisibles.has(p.id) ? nuevos[i++] : p))
+    // Se muestra el orden nuevo al instante y se guarda en segundo plano.
+    setProductos(completa)
+    setEnArrastre(null)
+    if (completa.every((p, idx) => p.id === productos[idx].id)) return
+    setProductos(await reordenarProductos(completa.map((p) => p.id)))
+    toast({ mensaje: 'Orden guardado. Así se ve en el catálogo.' })
   }
 
   async function toggle(p, campo) {
     await saveProducto({ ...p, [campo]: !p[campo] })
-    cargar()
+    await cargar()
+    const mensajes = {
+      activo: p.activo ? `"${p.titulo}" ya no se ve en el sitio` : `"${p.titulo}" vuelve a verse en el sitio`,
+      destacado: p.destacado ? `"${p.titulo}" salió de destacados` : `"${p.titulo}" aparece en el inicio`,
+    }
+    toast({
+      mensaje: mensajes[campo],
+      deshacer: async () => {
+        await saveProducto(p)
+        cargar()
+      },
+    })
   }
 
-  async function eliminar(id) {
-    if (!confirm('¿Eliminar este producto?')) return
-    await deleteProducto(id)
-    cargar()
+  async function eliminar(p) {
+    await deleteProducto(p.id)
+    await cargar()
+    toast({
+      mensaje: `Eliminaste "${p.titulo}"`,
+      deshacer: async () => {
+        await saveProducto(p)
+        cargar()
+      },
+    })
+  }
+
+  async function guardar(producto) {
+    const esNuevo = !producto.id
+    await saveProducto(producto)
+    setEditando(null)
+    await cargar()
+    toast({ mensaje: esNuevo ? 'Producto creado ✓' : 'Cambios guardados ✓' })
   }
 
   if (loading) {
     return <div className="h-64 animate-pulse rounded-3xl border border-line bg-white" />
   }
 
+  const puedeOrdenar = !busqueda.trim()
+  const filtros = [{ id: 'todas', titulo: 'Todos' }, ...categorias]
+
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between gap-4">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-2xl text-ink">
           Productos <span className="text-ink-soft/50">({productos.length})</span>
         </h2>
-        <button
-          onClick={() => setForm({ ...vacio, categoriaId: categorias[0]?.id || '' })}
-          className={btnPrimary}
-        >
-          <Plus size={16} /> Nuevo producto
-        </button>
-      </div>
-
-      <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-[var(--shadow-soft)]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b border-line bg-cream/60 text-left text-xs uppercase tracking-wide text-ink-soft/70">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Producto</th>
-                <th className="px-5 py-3 font-semibold">Categoría</th>
-                <th className="px-5 py-3 font-semibold">Precio</th>
-                <th className="px-5 py-3 font-semibold">Destacado</th>
-                <th className="px-5 py-3 font-semibold">Estado</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {productos.map((p) => (
-                <motion.tr
-                  key={p.id}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="border-b border-line/70 transition-colors last:border-0 hover:bg-cream/50"
-                >
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      {p.imagen ? (
-                        <img
-                          src={p.imagen}
-                          alt=""
-                          className="h-10 w-10 shrink-0 rounded-xl object-cover"
-                        />
-                      ) : (
-                        <span className="h-10 w-10 shrink-0 rounded-xl bg-wine-50" />
-                      )}
-                      <div>
-                        <p className="font-semibold text-ink">{p.titulo}</p>
-                        <p className="text-xs text-ink-soft">{p.marca}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-ink-soft">
-                    {categorias.find((c) => c.id === p.categoriaId)?.titulo || '—'}
-                  </td>
-                  <td className="px-5 py-3 font-medium text-ink">{formatPrecio(p.precio)}</td>
-                  <td className="px-5 py-3">
-                    <button
-                      onClick={() => toggle(p, 'destacado')}
-                      aria-label="Destacar producto"
-                      className="focus-ring rounded-full p-1.5 transition-transform duration-200 hover:scale-125"
-                    >
-                      <Star
-                        size={18}
-                        className={
-                          p.destacado ? 'fill-wine-500 text-wine-500' : 'text-ink-soft/30'
-                        }
-                      />
-                    </button>
-                  </td>
-                  <td className="px-5 py-3">
-                    <button
-                      onClick={() => toggle(p, 'activo')}
-                      className={`focus-ring rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
-                        p.activo
-                          ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                          : 'bg-line/60 text-ink-soft hover:bg-line'
-                      }`}
-                    >
-                      {p.activo ? 'Visible' : 'Oculto'}
-                    </button>
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex justify-end gap-1">
-                      <button
-                        onClick={() => abrirEdicion(p)}
-                        aria-label="Editar"
-                        className={iconBtn}
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
-                        onClick={() => eliminar(p.id)}
-                        aria-label="Eliminar"
-                        className={`${iconBtn} hover:bg-red-50 hover:text-red-600`}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex w-full gap-2 sm:w-auto">
+          <button onClick={() => setPreciosAbierto(true)} className={`${btnGhost} flex flex-1 items-center justify-center gap-1.5 sm:flex-none`}>
+            <Percent size={15} /> <span className="sm:hidden">Precios</span>
+            <span className="hidden sm:inline">Actualizar precios</span>
+          </button>
+          <button onClick={() => setEditando({})} className={`${btnPrimary} flex-1 sm:flex-none`}>
+            <Plus size={16} /> <span className="sm:hidden">Nuevo</span>
+            <span className="hidden sm:inline">Nuevo producto</span>
+          </button>
         </div>
       </div>
 
-      <Modal
-        open={Boolean(form)}
-        onClose={() => setForm(null)}
-        title={form?.id ? 'Editar producto' : 'Nuevo producto'}
-      >
-        {form && (
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3.5">
-            <label className={`col-span-2 ${labelClass}`}>
-              Título
-              <input
-                required
-                value={form.titulo}
-                onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                className={inputClass}
-              />
-            </label>
-            <label className={labelClass}>
-              Marca
-              <input
-                value={form.marca}
-                onChange={(e) => setForm({ ...form, marca: e.target.value })}
-                className={inputClass}
-              />
-            </label>
-            <label className={labelClass}>
-              Categoría
-              <select
-                value={form.categoriaId}
-                onChange={(e) => setForm({ ...form, categoriaId: e.target.value })}
-                className={inputClass}
-              >
-                {categorias.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.titulo}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={labelClass}>
-              Precio
-              <input
-                type="number"
-                required
-                value={form.precio}
-                onChange={(e) => setForm({ ...form, precio: e.target.value })}
-                className={inputClass}
-              />
-            </label>
-            <label className={labelClass}>
-              Precio anterior
-              <input
-                type="number"
-                value={form.precioAnterior}
-                onChange={(e) => setForm({ ...form, precioAnterior: e.target.value })}
-                placeholder="Opcional"
-                className={inputClass}
-              />
-            </label>
-            <label className={labelClass}>
-              Cuotas sin interés
-              <input
-                type="number"
-                value={form.cuotasCantidad}
-                onChange={(e) => setForm({ ...form, cuotasCantidad: e.target.value })}
-                placeholder="Ej: 3"
-                className={inputClass}
-              />
-            </label>
-            <label className={labelClass}>
-              Tarjeta
-              <input
-                value={form.cuotasTarjeta}
-                onChange={(e) => setForm({ ...form, cuotasTarjeta: e.target.value })}
-                placeholder="todas las tarjetas"
-                className={inputClass}
-              />
-            </label>
-            <label className={`col-span-2 ${labelClass}`}>
-              Imagen (URL)
-              <input
-                value={form.imagen}
-                onChange={(e) => setForm({ ...form, imagen: e.target.value })}
-                className={inputClass}
-              />
-            </label>
-            <label className={`col-span-2 ${labelClass}`}>
-              Descripción
-              <textarea
-                rows={3}
-                value={form.descripcion}
-                onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                className={`${inputClass} resize-none`}
-              />
-            </label>
+      <div className="mb-4 flex flex-col gap-3">
+        <label className="relative">
+          <span className="sr-only">Buscar producto</span>
+          <Search size={16} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-soft/60" />
+          <input
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre o marca…"
+            className="focus-ring w-full rounded-full border border-line bg-white py-2.5 pr-10 pl-10 text-sm transition-colors focus:border-wine-400"
+          />
+          {busqueda && (
+            <button
+              onClick={() => setBusqueda('')}
+              aria-label="Borrar búsqueda"
+              className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-ink-soft hover:bg-wine-50"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </label>
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+          {filtros.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setCategoriaFiltro(c.id)}
+              className={`focus-ring shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                categoriaFiltro === c.id
+                  ? 'bg-ink text-white'
+                  : 'border border-line bg-white text-ink-soft hover:border-wine-300'
+              }`}
+            >
+              {c.titulo}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-ink-soft">
+          {puedeOrdenar ? (
+            <>
+              Arrastrá desde <GripVertical size={12} className="inline align-[-2px]" /> para cambiar
+              el orden en el catálogo. <Star size={12} className="inline align-[-2px]" /> destaca el
+              producto en el inicio y <Eye size={12} className="inline align-[-2px]" /> lo muestra u
+              oculta.
+            </>
+          ) : (
+            'Para cambiar el orden, borrá la búsqueda.'
+          )}
+        </p>
+      </div>
 
-            <label className="col-span-2 flex cursor-pointer items-center gap-2.5 rounded-xl bg-cream/60 px-3.5 py-2.5 text-sm transition-colors hover:bg-wine-50 sm:col-span-1">
-              <input
-                type="checkbox"
-                checked={form.destacado}
-                onChange={(e) => setForm({ ...form, destacado: e.target.checked })}
-                className="accent-wine-600"
-              />
-              Destacado
-            </label>
-            <label className="col-span-2 flex cursor-pointer items-center gap-2.5 rounded-xl bg-cream/60 px-3.5 py-2.5 text-sm transition-colors hover:bg-wine-50 sm:col-span-1">
-              <input
-                type="checkbox"
-                checked={form.activo}
-                onChange={(e) => setForm({ ...form, activo: e.target.checked })}
-                className="accent-wine-600"
-              />
-              Visible en el sitio
-            </label>
+      {visibles.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-line bg-white px-6 py-14 text-center text-sm text-ink-soft">
+          No hay productos que coincidan.
+        </div>
+      ) : (
+        <Reorder.Group axis="y" values={visibles} onReorder={alReordenar} className="flex flex-col gap-2.5">
+          {visibles.map((p) => (
+            <FilaProducto
+              key={p.id}
+              producto={p}
+              categoria={categorias.find((c) => c.id === p.categoriaId)}
+              puedeOrdenar={puedeOrdenar}
+              onEditar={() => setEditando(p)}
+              onToggle={(campo) => toggle(p, campo)}
+              onEliminar={() => eliminar(p)}
+              onSoltar={guardarOrden}
+            />
+          ))}
+        </Reorder.Group>
+      )}
 
-            <div className="col-span-2 mt-3 flex justify-end gap-2">
-              <button type="button" onClick={() => setForm(null)} className={btnGhost}>
-                Cancelar
-              </button>
-              <button type="submit" className={btnPrimary}>
-                Guardar
-              </button>
-            </div>
-          </form>
-        )}
-      </Modal>
+      <ProductoForm
+        producto={editando}
+        categorias={categorias}
+        onClose={() => setEditando(null)}
+        onGuardar={guardar}
+      />
+
+      <PreciosMasivos
+        open={preciosAbierto}
+        onClose={() => setPreciosAbierto(false)}
+        productos={productos}
+        categorias={categorias}
+        onAplicado={cargar}
+      />
     </div>
   )
 }

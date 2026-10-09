@@ -43,7 +43,7 @@ export default function Navbar() {
           </span>
         </NavLink>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {links.map((l) => (
             <NavLink
               key={l.to}
@@ -73,7 +73,7 @@ export default function Navbar() {
         </nav>
 
         <button
-          className="focus-ring rounded-full p-2 text-ink transition-colors hover:bg-wine-50 md:hidden"
+          className="focus-ring rounded-full p-2 text-ink transition-colors hover:bg-wine-50 lg:hidden"
           onClick={() => setOpen((o) => !o)}
           aria-label="Abrir menú"
           aria-expanded={open}
@@ -89,7 +89,7 @@ export default function Navbar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-t border-line bg-cream/95 backdrop-blur-xl md:hidden"
+            className="overflow-hidden border-t border-line bg-cream/95 backdrop-blur-xl lg:hidden"
           >
             <div className="flex flex-col gap-1 px-5 py-3">
               {links.map((l) => (

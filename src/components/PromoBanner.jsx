@@ -1,8 +1,18 @@
 import { Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { listPromociones } from '../lib/backend'
 
 // Cinta de promociones. Antes rotaba de a una con `truncate`, así que en
 // mobile las promos largas salían cortadas; ahora desfilan todas en bucle.
-export default function PromoBanner({ promociones }) {
+// Busca las promociones por su cuenta, así cualquier página la puede poner
+// arriba sin tener que cargarlas.
+export default function PromoBanner() {
+  const [promociones, setPromociones] = useState([])
+
+  useEffect(() => {
+    listPromociones().then(setPromociones)
+  }, [])
+
   const activas = promociones.filter((p) => p.activo)
 
   if (activas.length === 0) return null

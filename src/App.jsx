@@ -1,11 +1,6 @@
 import { MotionConfig } from 'framer-motion'
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-} from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -13,16 +8,19 @@ import ScrollToTop from './components/ScrollToTop'
 import WhatsappFab from './components/WhatsappFab'
 import { AuthProvider } from './context/AuthContext'
 import { isAdminHost, LOGIN_PATH, PANEL_PATH } from './lib/routes'
-import AdminLayout from './pages/admin/AdminLayout'
-import CategoriasAdmin from './pages/admin/CategoriasAdmin'
-import ConsultasAdmin from './pages/admin/ConsultasAdmin'
-import Login from './pages/admin/Login'
-import ProductosAdmin from './pages/admin/ProductosAdmin'
-import PromocionesAdmin from './pages/admin/PromocionesAdmin'
 import Catalogo from './pages/Catalogo'
 import Contacto from './pages/Contacto'
 import Home from './pages/Home'
+import Producto from './pages/Producto'
 import Promociones from './pages/Promociones'
+
+// El panel se descarga aparte: quien entra al catálogo no baja su código.
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
+const CategoriasAdmin = lazy(() => import('./pages/admin/CategoriasAdmin'))
+const ConsultasAdmin = lazy(() => import('./pages/admin/ConsultasAdmin'))
+const Login = lazy(() => import('./pages/admin/Login'))
+const ProductosAdmin = lazy(() => import('./pages/admin/ProductosAdmin'))
+const PromocionesAdmin = lazy(() => import('./pages/admin/PromocionesAdmin'))
 
 // Recibe `location` por prop en vez de leerla con useLocation(): al estar
 // montado como element de una ruta comodín (`path="/*"`), este componente no
@@ -41,6 +39,7 @@ function SitioPublico({ location }) {
           <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/catalogo" element={<Catalogo />} />
+            <Route path="/producto/:id" element={<Producto />} />
             <Route path="/promociones" element={<Promociones />} />
             <Route path="/contacto" element={<Contacto />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -59,28 +58,30 @@ function Contenido() {
   const location = useLocation()
 
   return (
-    <Routes location={location}>
-      <Route path={LOGIN_PATH} element={<Login />} />
-      <Route
-        path={PANEL_PATH}
-        element={
-          <ProtectedRoute>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<ProductosAdmin />} />
-        <Route path="categorias" element={<CategoriasAdmin />} />
-        <Route path="promociones" element={<PromocionesAdmin />} />
-        <Route path="consultas" element={<ConsultasAdmin />} />
-      </Route>
+    <Suspense fallback={null}>
+      <Routes location={location}>
+        <Route path={LOGIN_PATH} element={<Login />} />
+        <Route
+          path={PANEL_PATH}
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ProductosAdmin />} />
+          <Route path="categorias" element={<CategoriasAdmin />} />
+          <Route path="promociones" element={<PromocionesAdmin />} />
+          <Route path="consultas" element={<ConsultasAdmin />} />
+        </Route>
 
-      {isAdminHost ? (
-        <Route path="*" element={<Navigate to={PANEL_PATH} replace />} />
-      ) : (
-        <Route path="/*" element={<SitioPublico location={location} />} />
-      )}
-    </Routes>
+        {isAdminHost ? (
+          <Route path="*" element={<Navigate to={PANEL_PATH} replace />} />
+        ) : (
+          <Route path="/*" element={<SitioPublico location={location} />} />
+        )}
+      </Routes>
+    </Suspense>
   )
 }
 

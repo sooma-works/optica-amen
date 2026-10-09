@@ -46,14 +46,15 @@ export default function PromocionesAdmin() {
   return (
     <div>
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="font-display text-2xl text-ink">
+        <h2 className="font-display text-2xl whitespace-nowrap text-ink">
           Promociones <span className="text-ink-soft/50">({promociones.length})</span>
         </h2>
         <button
           onClick={() => setForm({ ...vacio, orden: promociones.length })}
-          className={btnPrimary}
+          className={`${btnPrimary} shrink-0 whitespace-nowrap`}
         >
-          <Plus size={16} /> Nueva promoción
+          <Plus size={16} /> <span className="sm:hidden">Nueva</span>
+          <span className="hidden sm:inline">Nueva promoción</span>
         </button>
       </div>
 
@@ -64,7 +65,7 @@ export default function PromocionesAdmin() {
             layout
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group flex items-center justify-between gap-4 rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-wine-200 hover:shadow-[var(--shadow-soft)]"
+            className="group flex flex-col gap-4 rounded-2xl border border-line bg-white p-5 sm:flex-row sm:items-center sm:justify-between transition-all duration-300 hover:-translate-y-0.5 hover:border-wine-200 hover:shadow-[var(--shadow-soft)]"
           >
             <div className="flex items-start gap-3.5">
               <span
@@ -83,7 +84,7 @@ export default function PromocionesAdmin() {
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="-mb-1 flex shrink-0 items-center justify-end gap-1 border-t border-line pt-3 sm:mb-0 sm:border-0 sm:pt-0">
               <button
                 onClick={() => toggleActivo(p)}
                 className={`focus-ring mr-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${

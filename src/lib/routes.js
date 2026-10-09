@@ -19,3 +19,8 @@ export function adminPath(sub = '') {
   if (!sub) return PANEL_PATH
   return isAdminHost ? `/${sub}` : `/admin/${sub}`
 }
+
+// Ficha pública de un producto (es el link que se comparte por WhatsApp).
+export function linkProducto(producto) {
+  return `/producto/${producto.id}`
+}

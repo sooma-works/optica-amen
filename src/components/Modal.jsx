@@ -2,7 +2,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useEffect } from 'react'
 
-export default function Modal({ open, onClose, title, children }) {
+const anchos = { md: 'max-w-lg', lg: 'max-w-4xl' }
+
+export default function Modal({ open, onClose, title, children, size = 'md' }) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -13,7 +15,7 @@ export default function Modal({ open, onClose, title, children }) {
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-2 sm:items-center sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -27,7 +29,7 @@ export default function Modal({ open, onClose, title, children }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="relative max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-7 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.4)]"
+            className={`relative max-h-[92vh] w-full ${anchos[size]} overflow-y-auto rounded-3xl bg-white p-5 sm:p-7 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.4)]`}
           >
             <div className="mb-5 flex items-start justify-between gap-4">
               <h3 className="font-display text-xl text-ink">{title}</h3>

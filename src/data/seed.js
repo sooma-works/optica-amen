@@ -1,3 +1,7 @@
+// Subir este número cuando cambien los datos de ejemplo: en modo demo, los
+// navegadores que ya tenían datos viejos guardados vuelven a cargar el seed.
+export const SEED_VERSION = 4
+
 export const categoriasSeed = [
   { id: 'sol', titulo: 'Anteojos de Sol', orden: 0 },
   { id: 'recetados', titulo: 'Anteojos Recetados', orden: 1 },
@@ -16,8 +20,11 @@ export const productosSeed = [
     cuotas: { cantidad: 3, tarjeta: 'todas las tarjetas' },
     descripcion:
       'El aviador de siempre: marco metálico, lentes con protección UV400 y puente doble. Ideal para uso diario.',
-    imagen:
-      'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&q=80',
+    imagenes: [
+      'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=1200&q=80',
+      'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1200&q=80',
+      'https://images.unsplash.com/photo-1577744486770-020ab432da65?w=1200&q=80',
+    ],
     destacado: true,
     activo: true,
     orden: 0,
@@ -31,8 +38,11 @@ export const productosSeed = [
     precioAnterior: null,
     cuotas: { cantidad: 6, tarjeta: 'Visa y Mastercard' },
     descripcion: 'Marco de acetato color havana, forma clásica wayfarer. Lentes polarizados.',
-    imagen:
-      'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&q=80',
+    imagenes: [
+      'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=1200&q=80',
+      'https://images.unsplash.com/photo-1584036553516-bf83210aa16c?w=1200&q=80',
+      'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1200&q=80',
+    ],
     destacado: true,
     activo: true,
     orden: 1,
@@ -46,9 +56,11 @@ export const productosSeed = [
     precioAnterior: 79000,
     cuotas: { cantidad: 3, tarjeta: 'todas las tarjetas' },
     descripcion: 'Marco metálico dorado con lentes degradé. Estilo retro liviano.',
-    imagen:
-      'https://images.unsplash.com/photo-1577803645773-f96470509666?w=800&q=80',
-    destacado: false,
+    imagenes: [
+      'https://images.unsplash.com/photo-1577803645773-f96470509666?w=1200&q=80',
+      'https://images.unsplash.com/photo-1577744486770-020ab432da65?w=1200&q=80',
+    ],
+    destacado: true,
     activo: true,
     orden: 2,
   },
@@ -61,11 +73,13 @@ export const productosSeed = [
     precioAnterior: null,
     cuotas: { cantidad: 6, tarjeta: 'todas las tarjetas' },
     descripcion: 'Marco liviano de acetato símil carey. Incluye armazón, no incluye cristales.',
-    imagen:
-      'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=800&q=80',
+    imagenes: [
+      'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=1200&q=80',
+      'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=1200&q=80',
+    ],
     destacado: true,
     activo: true,
-    orden: 0,
+    orden: 3,
   },
   {
     id: 'ovalado-titanio',
@@ -76,11 +90,13 @@ export const productosSeed = [
     precioAnterior: 99000,
     cuotas: { cantidad: 6, tarjeta: 'Visa y Mastercard' },
     descripcion: 'Marco ultraliviano de titanio, ideal para uso prolongado. Ajuste anatómico.',
-    imagen:
-      'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=800&q=80',
-    destacado: false,
+    imagenes: [
+      'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=1200&q=80',
+      'https://images.unsplash.com/photo-1614715838608-dd527c46231d?w=1200&q=80',
+    ],
+    destacado: true,
     activo: true,
-    orden: 1,
+    orden: 4,
   },
   {
     id: 'cuadrado-negro-mate',
@@ -91,11 +107,13 @@ export const productosSeed = [
     precioAnterior: null,
     cuotas: { cantidad: 3, tarjeta: 'todas las tarjetas' },
     descripcion: 'Marco de acetato negro mate, diseño unisex, calce universal.',
-    imagen:
-      'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=800&q=80',
+    imagenes: [
+      'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=1200&q=80',
+      'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=1200&q=80',
+    ],
     destacado: false,
     activo: true,
-    orden: 2,
+    orden: 5,
   },
   {
     id: 'lentes-contacto-diarios',
@@ -106,11 +124,12 @@ export const productosSeed = [
     precioAnterior: null,
     cuotas: { cantidad: 3, tarjeta: 'todas las tarjetas' },
     descripcion: 'Caja de 30 unidades, descartables diarios. Alta transmisión de oxígeno.',
-    imagen:
-      'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80',
+    imagenes: [
+      '/img/lentes-contacto.jpg',
+    ],
     destacado: true,
     activo: true,
-    orden: 0,
+    orden: 6,
   },
   {
     id: 'estuche-rigido',
@@ -121,11 +140,12 @@ export const productosSeed = [
     precioAnterior: null,
     cuotas: null,
     descripcion: 'Estuche rígido acolchado con paño de limpieza incluido.',
-    imagen:
-      'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=800&q=80',
+    imagenes: [
+      '/img/estuche-rigido.jpg',
+    ],
     destacado: false,
     activo: true,
-    orden: 0,
+    orden: 7,
   },
 ]
 
@@ -153,5 +173,45 @@ export const promocionesSeed = [
     tarjeta: 'Visa / Mastercard Galicia',
     activo: true,
     orden: 2,
+  },
+]
+
+// Consultas de ejemplo para que el panel no arranque vacío en la demo.
+const haceHoras = (h) => new Date(Date.now() - h * 3600_000).toISOString()
+
+export const consultasSeed = [
+  {
+    id: 'demo-consulta-1',
+    nombre: 'Lucía Fernández',
+    email: 'lucia.fernandez@example.com',
+    telefono: '341 555-1234',
+    motivo: 'Presupuesto de anteojos recetados',
+    mensaje:
+      'Hola! Quería saber cuánto saldría el armazón Rectangular Carey con cristales antirreflejo. Tengo la receta del oftalmólogo.',
+    leida: false,
+    respondida: false,
+    creado_at: haceHoras(2),
+  },
+  {
+    id: 'demo-consulta-2',
+    nombre: 'Martín Gómez',
+    email: 'martin.gomez@example.com',
+    telefono: '341 555-9876',
+    motivo: 'Lentes de contacto',
+    mensaje: '¿Tienen las Acuvue diarias en stock? Uso -2.25 en los dos ojos.',
+    leida: false,
+    respondida: false,
+    creado_at: haceHoras(20),
+  },
+  {
+    id: 'demo-consulta-3',
+    nombre: 'Carla Benítez',
+    email: 'carla.benitez@example.com',
+    telefono: null,
+    motivo: 'Reparación o ajuste',
+    mensaje: 'Se me aflojó una patilla de los anteojos de sol. ¿Lo arreglan en el momento?',
+    leida: true,
+    respondida: true,
+    creado_at: haceHoras(52),
   },
 ]

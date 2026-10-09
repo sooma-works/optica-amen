@@ -146,3 +146,12 @@ body {
     animation: none;
   }
 }
+
+/* Carruseles que se deslizan con el dedo: sin barra de scroll visible. */
+.sin-scrollbar {
+  scrollbar-width: none;
+}
+
+.sin-scrollbar::-webkit-scrollbar {
+  display: none;
+}

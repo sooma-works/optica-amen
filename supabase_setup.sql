@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS productos (
   cuotas_tarjeta TEXT,
   descripcion TEXT DEFAULT '',
   imagen TEXT DEFAULT '',
+  imagenes TEXT[] DEFAULT '{}',
   destacado BOOLEAN DEFAULT FALSE,
   activo BOOLEAN DEFAULT TRUE,
   orden INTEGER DEFAULT 0
@@ -43,8 +44,13 @@ CREATE TABLE IF NOT EXISTS consultas (
   motivo TEXT DEFAULT '',
   mensaje TEXT NOT NULL,
   leida BOOLEAN DEFAULT FALSE,
+  respondida BOOLEAN DEFAULT FALSE,
   creado_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Para bases creadas con una versión anterior de este script:
+ALTER TABLE productos ADD COLUMN IF NOT EXISTS imagenes TEXT[] DEFAULT '{}';
+ALTER TABLE consultas ADD COLUMN IF NOT EXISTS respondida BOOLEAN DEFAULT FALSE;
 
 -- 2. RLS: lectura pública, escritura solo para usuarios autenticados (admin)
 ALTER TABLE categorias ENABLE ROW LEVEL SECURITY;
@@ -84,15 +90,15 @@ INSERT INTO categorias (id, titulo, orden) VALUES
   ('accesorios', 'Accesorios', 3)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO productos (id, categoria_id, titulo, marca, precio, precio_anterior, cuotas_cantidad, cuotas_tarjeta, descripcion, imagen, destacado, activo, orden) VALUES
-  ('ray-classic-negro', 'sol', 'Aviador Clásico', 'Ray-Ban', 145000, 168000, 3, 'todas las tarjetas', 'El aviador de siempre: marco metálico, lentes con protección UV400 y puente doble. Ideal para uso diario.', 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&q=80', true, true, 0),
-  ('wayfarer-havana', 'sol', 'Wayfarer Havana', 'Ray-Ban', 132000, NULL, 6, 'Visa y Mastercard', 'Marco de acetato color havana, forma clásica wayfarer. Lentes polarizados.', 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&q=80', true, true, 1),
-  ('redonditos-oro', 'sol', 'Redondos Oro', 'Vulk', 68000, 79000, 3, 'todas las tarjetas', 'Marco metálico dorado con lentes degradé. Estilo retro liviano.', 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=800&q=80', false, true, 2),
-  ('rectangular-carey', 'recetados', 'Rectangular Carey', 'Infinit', 54000, NULL, 6, 'todas las tarjetas', 'Marco liviano de acetato símil carey. Incluye armazón, no incluye cristales.', 'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=800&q=80', true, true, 0),
-  ('ovalado-titanio', 'recetados', 'Ovalado Titanio', 'Vulk', 89000, 99000, 6, 'Visa y Mastercard', 'Marco ultraliviano de titanio, ideal para uso prolongado. Ajuste anatómico.', 'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=800&q=80', false, true, 1),
-  ('cuadrado-negro-mate', 'recetados', 'Cuadrado Negro Mate', 'Infinit', 47000, NULL, 3, 'todas las tarjetas', 'Marco de acetato negro mate, diseño unisex, calce universal.', 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=800&q=80', false, true, 2),
-  ('lentes-contacto-diarios', 'contacto', 'Lentes de Contacto Diarios x30', 'Acuvue', 38000, NULL, 3, 'todas las tarjetas', 'Caja de 30 unidades, descartables diarios. Alta transmisión de oxígeno.', 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80', true, true, 0),
-  ('estuche-rigido', 'accesorios', 'Estuche Rígido', 'Óptica A.M.E.N.', 8500, NULL, NULL, NULL, 'Estuche rígido acolchado con paño de limpieza incluido.', 'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=800&q=80', false, true, 0)
+INSERT INTO productos (id, categoria_id, titulo, marca, precio, precio_anterior, cuotas_cantidad, cuotas_tarjeta, descripcion, imagen, imagenes, destacado, activo, orden) VALUES
+  ('ray-classic-negro', 'sol', 'Aviador Clásico', 'Ray-Ban', 145000, 168000, 3, 'todas las tarjetas', 'El aviador de siempre: marco metálico, lentes con protección UV400 y puente doble. Ideal para uso diario.', 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=1200&q=80', ARRAY['https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=1200&q=80', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1200&q=80', 'https://images.unsplash.com/photo-1577744486770-020ab432da65?w=1200&q=80'], true, true, 0),
+  ('wayfarer-havana', 'sol', 'Wayfarer Havana', 'Ray-Ban', 132000, NULL, 6, 'Visa y Mastercard', 'Marco de acetato color havana, forma clásica wayfarer. Lentes polarizados.', 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=1200&q=80', ARRAY['https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=1200&q=80', 'https://images.unsplash.com/photo-1584036553516-bf83210aa16c?w=1200&q=80', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1200&q=80'], true, true, 1),
+  ('redonditos-oro', 'sol', 'Redondos Oro', 'Vulk', 68000, 79000, 3, 'todas las tarjetas', 'Marco metálico dorado con lentes degradé. Estilo retro liviano.', 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=1200&q=80', ARRAY['https://images.unsplash.com/photo-1577803645773-f96470509666?w=1200&q=80', 'https://images.unsplash.com/photo-1577744486770-020ab432da65?w=1200&q=80'], true, true, 2),
+  ('rectangular-carey', 'recetados', 'Rectangular Carey', 'Infinit', 54000, NULL, 6, 'todas las tarjetas', 'Marco liviano de acetato símil carey. Incluye armazón, no incluye cristales.', 'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=1200&q=80', ARRAY['https://images.unsplash.com/photo-1591076482161-42ce6da69f67?w=1200&q=80', 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=1200&q=80'], true, true, 3),
+  ('ovalado-titanio', 'recetados', 'Ovalado Titanio', 'Vulk', 89000, 99000, 6, 'Visa y Mastercard', 'Marco ultraliviano de titanio, ideal para uso prolongado. Ajuste anatómico.', 'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=1200&q=80', ARRAY['https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=1200&q=80', 'https://images.unsplash.com/photo-1614715838608-dd527c46231d?w=1200&q=80'], true, true, 4),
+  ('cuadrado-negro-mate', 'recetados', 'Cuadrado Negro Mate', 'Infinit', 47000, NULL, 3, 'todas las tarjetas', 'Marco de acetato negro mate, diseño unisex, calce universal.', 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=1200&q=80', ARRAY['https://images.unsplash.com/photo-1508296695146-257a814070b4?w=1200&q=80', 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=1200&q=80'], false, true, 5),
+  ('lentes-contacto-diarios', 'contacto', 'Lentes de Contacto Diarios x30', 'Acuvue', 38000, NULL, 3, 'todas las tarjetas', 'Caja de 30 unidades, descartables diarios. Alta transmisión de oxígeno.', '/img/lentes-contacto.jpg', ARRAY['/img/lentes-contacto.jpg'], true, true, 6),
+  ('estuche-rigido', 'accesorios', 'Estuche Rígido', 'Óptica A.M.E.N.', 8500, NULL, NULL, NULL, 'Estuche rígido acolchado con paño de limpieza incluido.', '/img/estuche-rigido.jpg', ARRAY['/img/estuche-rigido.jpg'], false, true, 7)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO promociones (id, titulo, descripcion, tarjeta, activo, orden) VALUES
