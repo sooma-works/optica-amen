@@ -3,6 +3,7 @@ import { ArrowRight, ArrowUpRight, CreditCard, Glasses, ShieldCheck, Sun } from 
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import CardSkeleton from '../components/CardSkeleton'
+import LogosTarjetas from '../components/LogosTarjetas'
 import BlurText from '../components/fx/BlurText'
 import Compare from '../components/fx/Compare'
 import Tilt from '../components/fx/Tilt'
@@ -16,7 +17,12 @@ import { imagenesDe, imgAncho } from '../lib/imagenes'
 const beneficios = [
   { icon: Glasses, titulo: 'Armado propio', texto: 'Taller en el local, entrega en 48 h.' },
   { icon: ShieldCheck, titulo: 'Garantía de 6 meses', texto: 'En armazones y cristales.' },
-  { icon: CreditCard, titulo: 'Cuotas sin interés', texto: 'Hasta 6 con todas las tarjetas.' },
+  {
+    icon: CreditCard,
+    titulo: 'Cuotas sin interés',
+    texto: 'Hasta 6 con todas las tarjetas.',
+    tarjetas: 'todas',
+  },
 ]
 
 // Foto de ejemplo para la demo (Unsplash). Reemplazar por una campaña propia.
@@ -180,7 +186,10 @@ export default function Home() {
                 <b.icon size={21} />
               </span>
               <div>
-                <p className="font-semibold text-ink">{b.titulo}</p>
+                <p className="flex items-center gap-2 font-semibold text-ink">
+                  {b.titulo}
+                  {b.tarjetas && <LogosTarjetas texto={b.tarjetas} />}
+                </p>
                 <p className="text-sm text-ink-soft">{b.texto}</p>
               </div>
             </motion.li>

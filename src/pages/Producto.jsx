@@ -17,6 +17,7 @@ import Lens from '../components/fx/Lens'
 import Tilt from '../components/fx/Tilt'
 import { WhatsappIcon } from '../components/icons'
 import Lightbox from '../components/Lightbox'
+import LogosTarjetas from '../components/LogosTarjetas'
 import ProductCard from '../components/ProductCard'
 import { linkWhatsapp, NEGOCIO } from '../config'
 import { getProducto, listCategorias, listProductos } from '../lib/backend'
@@ -234,6 +235,7 @@ export default function Producto() {
                 {producto.cuotas.cantidad} cuotas sin interés de{' '}
                 {formatPrecio(Math.ceil(producto.precio / producto.cuotas.cantidad))}
                 <span className="font-normal text-wine-600">· {producto.cuotas.tarjeta}</span>
+                <LogosTarjetas texto={producto.cuotas.tarjeta} className="self-center" />
               </p>
             )}
 

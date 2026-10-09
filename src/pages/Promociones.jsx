@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import LogosTarjetas from '../components/LogosTarjetas'
 import { CreditCard, Tag } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { linkWhatsapp } from '../config'
@@ -77,11 +78,14 @@ export default function Promociones() {
                   </div>
 
                   {p.tarjeta && (
-                    <p
-                      className={`mt-4 inline-block shrink-0 rounded-full bg-wine-50 px-3 py-1 text-xs font-semibold tracking-wide text-wine-700 ${ancha ? 'sm:mt-0' : ''}`}
+                    <div
+                      className={`mt-4 flex shrink-0 flex-wrap items-center gap-2 ${ancha ? 'sm:mt-0' : ''}`}
                     >
-                      {p.tarjeta}
-                    </p>
+                      <p className="rounded-full bg-wine-50 px-3 py-1 text-xs font-semibold tracking-wide text-wine-700">
+                        {p.tarjeta}
+                      </p>
+                      <LogosTarjetas texto={p.tarjeta} grande />
+                    </div>
                   )}
                 </div>
               </motion.article>
